@@ -67,7 +67,7 @@
                 border-radius: 6px !important;
             }
 
-            
+
 
             .main-content {
                 margin-left: 0 !important;
@@ -213,7 +213,7 @@
             <li class="sidebar-item" id="nav-edit-remarks" style="display:none;" onclick="switchTab('tab-remarks')">💬
                 Remarks Panel</li>
         </ul>
-        
+
     </nav>
 
     <!-- Main Workspace -->
@@ -460,26 +460,26 @@
     </div>
 
 
-<script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
 
     <!-- CORE JAVASCRIPT ENGINE (Completely Intact) -->
     <script>
         let globalStudentsDb = {};
         // Firebase Config (നിങ്ങൾ കോപ്പി ചെയ്തത്)
-const firebaseConfig = {
-    apiKey: "AIzaSyCBpogXSk3CwbwFxtVbq2MDY630GDG2g8k",
-    authDomain: "classroom-hub-69ddc.firebaseapp.com",
-    projectId: "classroom-hub-69ddc",
-    storageBucket: "classroom-hub-69ddc.appspot.com",
-    messagingSenderId: "205797772387",
-    appId: "1:205797772387:web:aa7d199ea0bc6baaa17c56",
-    measurementId: "G-7GDDMGG68Q"
-};
+        const firebaseConfig = {
+            apiKey: "AIzaSyCBpogXSk3CwbwFxtVbq2MDY630GDG2g8k",
+            authDomain: "classroom-hub-69ddc.firebaseapp.com",
+            projectId: "classroom-hub-69ddc",
+            storageBucket: "classroom-hub-69ddc.appspot.com",
+            messagingSenderId: "205797772387",
+            appId: "1:205797772387:web:aa7d199ea0bc6baaa17c56",
+            measurementId: "G-7GDDMGG68Q"
+        };
 
-// Initialize Firebase
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
 
         let activeStudentId = null;
         let monthCounter = 0;
@@ -543,31 +543,31 @@ const db = firebase.firestore();
         }
 
         function saveDatabaseToStorage() {
-    db.collection("schoolData").doc("studentsDb").set(globalStudentsDb)
-    .then(() => {
-        console.log("Data successfully saved to Firebase!");
-        updateDashboardDirectory();
-    })
-    .catch((error) => {
-        console.error("Error saving data: ", error);
-        alert("ഡാറ്റ സേവ് ചെയ്യുന്നതിൽ പരാജയപ്പെട്ടു!");
-    });
-}
-
-function loadDatabaseFromStorage() {
-    db.collection("schoolData").doc("studentsDb").get()
-    .then((doc) => {
-        if (doc.exists) {
-            globalStudentsDb = doc.data();
-        } else {
-            globalStudentsDb = {};
+            db.collection("schoolData").doc("studentsDb").set(globalStudentsDb)
+                .then(() => {
+                    console.log("Data successfully saved to Firebase!");
+                    updateDashboardDirectory();
+                })
+                .catch((error) => {
+                    console.error("Error saving data: ", error);
+                    alert("ഡാറ്റ സേവ് ചെയ്യുന്നതിൽ പരാജയപ്പെട്ടു!");
+                });
         }
-        updateDashboardDirectory();
-    })
-    .catch((error) => {
-        console.error("Error loading data: ", error);
-    });
-}
+
+        function loadDatabaseFromStorage() {
+            db.collection("schoolData").doc("studentsDb").get()
+                .then((doc) => {
+                    if (doc.exists) {
+                        globalStudentsDb = doc.data();
+                    } else {
+                        globalStudentsDb = {};
+                    }
+                    updateDashboardDirectory();
+                })
+                .catch((error) => {
+                    console.error("Error loading data: ", error);
+                });
+        }
 
 
         function updateDashboardDirectory() {
@@ -1016,23 +1016,25 @@ function loadDatabaseFromStorage() {
         }
 
         function deleteStudentProfile(id) {
-    if (confirm("ഈ വിദ്യാർത്ഥിയുടെ വിവരങ്ങൾ ഡിലീറ്റ് ചെയ്യണോ?")) {
-        // 1. ലോക്കൽ ഒബ്‌ജക്റ്റിൽ നിന്ന് ഡിലീറ്റ് ചെയ്യുന്നു
-        delete globalStudentsDb[id]; 
+            if (confirm("ഈ വിദ്യാർത്ഥിയുടെ വിവരങ്ങൾ ശാശ്വതമായി ഡിലീറ്റ് ചെയ്യണോ?")) {
+                // 1. ലോക്കൽ ഡാറ്റാബേസിൽ നിന്ന് ഡിലീറ്റ് ചെയ്യുന്നു
+                delete globalStudentsDb[id];
 
-        // 2. ഫയർബേസിലേക്ക് പുതിയ ഡാറ്റ സേവ് ചെയ്യുന്നു
-        db.collection("schoolData").doc("studentsDb").set(globalStudentsDb)
-        .then(() => {
-            alert("വിവരങ്ങൾ വിജയകരമായി ഡിലീറ്റ് ചെയ്തു!");
-            // 3. പേജ് റീലോഡ് ചെയ്യുന്നു
-            location.reload();
-        })
-        .catch((error) => {
-            console.error("Error updating database: ", error);
-            alert("ഡാറ്റാബേസിൽ നിന്ന് ഡിലീറ്റ് ചെയ്യാൻ സാധിച്ചില്ല. ദയവായി വീണ്ടും ശ്രമിക്കുക.");
-        });
-    }
-}
+                // 2. ഫയർബേസിലേക്ക് അപ്‌ഡേറ്റ് ചെയ്ത പുതിയ ലിസ്റ്റ് അയക്കുന്നു
+                db.collection("schoolData").doc("studentsDb").set(globalStudentsDb)
+                    .then(() => {
+                        alert("വിവരങ്ങൾ വിജയകരമായി നീക്കം ചെയ്തു!");
+
+                        // 3. കാർഡുകൾ അപ്‌ഡേറ്റ് ചെയ്യാൻ ഡാഷ്‌ബോർഡ് ഫംഗ്‌ഷൻ വിളിക്കുന്നു
+                        updateDashboardDirectory();
+                    })
+                    .catch((error) => {
+                        console.error("Firebase Error: ", error);
+                        alert("ഡാറ്റ നീക്കം ചെയ്യുന്നതിൽ പരാജയപ്പെട്ടു!");
+                    });
+            }
+        }
+
 
 
         function switchTab(tabId) {
