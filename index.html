@@ -668,7 +668,7 @@
                 return;
             }
 
-            // 3. മോഡലിനുള്ളിലെ കണ്ടന്റ് നിർമ്മിക്കുന്നു (നിങ്ങളുടെ നിലവിലുള്ള HTML ലോജിക്)
+            // 3. റിപ്പോർട്ട് കണ്ടന്റ് നിർമ്മിക്കുന്നു
             let reportHTML = "";
             if (student.examMonths && student.examMonths.length > 0) {
                 student.examMonths.forEach(m => {
@@ -706,7 +706,7 @@
                 });
             }
 
-            // Major Exams HTML ജനറേഷൻ
+            // Major Exams HTML
             const savedMajors = student.majorExams || {};
             let majorRowsHTML = "";
             majorExamsSubjects.forEach(sub => {
@@ -738,7 +738,7 @@
             <div><span style="color:#64748b;">DOB:</span> ${student.bio.dob || '—'}</div>
             <div><span style="color:#64748b;">Blood Group:</span> <strong style="color:#ef4444;">${student.bio.bloodGroup || '—'}</strong></div>
             <div><span style="color:#64748b;">Phone:</span> ${student.bio.phone || '—'}</div>
-            <div><span style="color:#64748b;">Aadhaar:</span> [Redacted]</div>
+            <div><span style="color:#64748b;">Aadhaar:</span> [Aadhaar Redacted]</div>
             <div><span style="color:#64748b;">Religion/Caste:</span> ${student.bio.religion || '—'} / ${student.bio.caste || '—'}</div>
         </div>
         <div style="font-size:13px; margin-bottom:20px;"><span style="color:#64748b;">Home Address:</span> ${student.bio.address || '—'}</div>
@@ -767,6 +767,8 @@
 
         <h5 style="margin:20px 0 8px 0; color:#0f172a; font-size:13px; text-transform:uppercase; letter-spacing:0.5px; border-bottom:1px solid #e2e8f0; padding-bottom:3px;">4. Teacher Remarks</h5>
         <p style="font-size:13px; line-height:1.5; white-space: pre-line; background:#f8fafc; padding:12px; border-radius:6px; border:1px solid #e2e8f0; margin:0;">${student.remarks || 'No behavioral notes recorded.'}</p>
+        
+        <div style="margin-top:20px;">${reportHTML}</div>
     `;
 
             // 5. പ്രിന്റ് ബട്ടൺ ലിസണർ സെറ്റ് ചെയ്യുന്നു
