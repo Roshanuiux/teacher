@@ -709,20 +709,4 @@ body {
         print-color-adjust: exact !important;
     }
 }
-.modal-overlay {
-    display: none;
-    position: fixed;
-    top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(0,0,0,0.5);
-    z-index: 1000;
-    align-items: center;
-    justify-content: center;
-}
-.modal-overlay.active { display: flex; }
-.modal-window {
-    background: #fff;
-    width: 90%;
-    border-radius: 12px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-}
 

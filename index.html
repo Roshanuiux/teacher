@@ -7,6 +7,30 @@
     <title>Classroom Hub - Pro Student Management System</title>
     <link rel="stylesheet" href="style.css">
     <style>
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-window {
+            background: #fff;
+            width: 90%;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+
         /* Premium Brand Icon Styling */
         .sidebar-brand {
             display: flex;
@@ -215,22 +239,22 @@
         </ul>
 
     </nav>
-<!-- Preview Modal Container -->
-<div id="quick-preview-modal" class="modal-overlay">
-    <div class="modal-window" style="max-width: 800px; max-height: 90vh; overflow-y: auto;">
-        <div class="modal-header">
-            <h2>Student Preview</h2>
-            <button class="close-btn" onclick="closeQuickPreviewModal()">✕</button>
-        </div>
-        <div id="preview-modal-body-content" style="padding: 20px;">
-            <!-- ഇവിടെയാണ് ഡൈനാമിക് ആയി കണ്ടന്റ് വരുന്നത് -->
-        </div>
-        <div style="padding: 20px; text-align: right; border-top: 1px solid #e2e8f0;">
-            <button class="btn btn-secondary" onclick="closeQuickPreviewModal()">Close</button>
-            <button class="btn btn-primary" id="preview-modal-print-btn">🖨️ Edit & Print</button>
+    <!-- Preview Modal Container -->
+    <div id="quick-preview-modal" class="modal-overlay">
+        <div class="modal-window" style="max-width: 800px; max-height: 90vh; overflow-y: auto;">
+            <div class="modal-header">
+                <h2>Student Preview</h2>
+                <button class="close-btn" onclick="closeQuickPreviewModal()">✕</button>
+            </div>
+            <div id="preview-modal-body-content" style="padding: 20px;">
+                <!-- ഇവിടെയാണ് ഡൈനാമിക് ആയി കണ്ടന്റ് വരുന്നത് -->
+            </div>
+            <div style="padding: 20px; text-align: right; border-top: 1px solid #e2e8f0;">
+                <button class="btn btn-secondary" onclick="closeQuickPreviewModal()">Close</button>
+                <button class="btn btn-primary" id="preview-modal-print-btn">🖨️ Edit & Print</button>
+            </div>
         </div>
     </div>
-</div>
 
     <!-- Main Workspace -->
     <main class="main-content">
@@ -504,30 +528,30 @@
 
         const majorExamsSubjects = ["Malayalam", "English", "Hindi", "Maths", "Science", "Social Science"];
 
-      window.onload = function () {
-    // 1. Initial setup for the preview modal
-    if (!document.getElementById('quick-preview-modal')) {
-        const pModal = document.createElement('div');
-        pModal.id = 'quick-preview-modal';
-        // ... (നിങ്ങളുടെ നിലവിലുള്ള മോഡൽ കോഡ് ഇവിടെ കൊടുക്കുക)
-        document.body.appendChild(pModal);
-    }
+        window.onload = function () {
+            // 1. Initial setup for the preview modal
+            if (!document.getElementById('quick-preview-modal')) {
+                const pModal = document.createElement('div');
+                pModal.id = 'quick-preview-modal';
+                // ... (നിങ്ങളുടെ നിലവിലുള്ള മോഡൽ കോഡ് ഇവിടെ കൊടുക്കുക)
+                document.body.appendChild(pModal);
+            }
 
-    // 2. ഇതാണ് ഏറ്റവും പ്രധാനപ്പെട്ട മാറ്റം (ഡാറ്റ തിരികെ എടുക്കാനുള്ള കോഡ്)
-    const savedData = localStorage.getItem('classroom_hub_nested_v3_2026');
-    if (savedData) {
-        globalStudentsDb = JSON.parse(savedData); // ഇത് ചെയ്താൽ മാത്രമേ ഡാറ്റ തിരിച്ചുകിട്ടൂ
-    } else {
-        globalStudentsDb = {}; // ഡാറ്റ ഇല്ലെങ്കിൽ പുതിയ ഒബ്ജക്റ്റ്
-    }
+            // 2. ഇതാണ് ഏറ്റവും പ്രധാനപ്പെട്ട മാറ്റം (ഡാറ്റ തിരികെ എടുക്കാനുള്ള കോഡ്)
+            const savedData = localStorage.getItem('classroom_hub_nested_v3_2026');
+            if (savedData) {
+                globalStudentsDb = JSON.parse(savedData); // ഇത് ചെയ്താൽ മാത്രമേ ഡാറ്റ തിരിച്ചുകിട്ടൂ
+            } else {
+                globalStudentsDb = {}; // ഡാറ്റ ഇല്ലെങ്കിൽ പുതിയ ഒബ്ജക്റ്റ്
+            }
 
-    // 3. ബാക്കി ഫംഗ്‌ഷനുകൾ
-    initMajorExamsTableStructure();
-    updateDashboardDirectory(); // പേജ് ലോഡ് ആകുമ്പോൾ ഡാറ്റ കാർഡുകൾ കാണിക്കാൻ
-    loadDatabaseFromStorage();  // ഫയർബേസിൽ നിന്ന് ഏറ്റവും പുതിയ ഡാറ്റ വരുന്നുണ്ടോ എന്ന് നോക്കാൻ
-    
-    switchTab('tab-dashboard');
-};
+            // 3. ബാക്കി ഫംഗ്‌ഷനുകൾ
+            initMajorExamsTableStructure();
+            updateDashboardDirectory(); // പേജ് ലോഡ് ആകുമ്പോൾ ഡാറ്റ കാർഡുകൾ കാണിക്കാൻ
+            loadDatabaseFromStorage();  // ഫയർബേസിൽ നിന്ന് ഏറ്റവും പുതിയ ഡാറ്റ വരുന്നുണ്ടോ എന്ന് നോക്കാൻ
+
+            switchTab('tab-dashboard');
+        };
 
 
         function initMajorExamsTableStructure() {
@@ -628,43 +652,43 @@
             });
         }
 
-      function openQuickPreviewModal(id) {
-    // 1. ഡാറ്റാബേസിൽ നിന്ന് ഈ ID-യിലുള്ള സ്റ്റുഡന്റ് ഡാറ്റ ഉണ്ടോ എന്ന് പരിശോധിക്കുന്നു
-    const student = globalStudentsDb[id];
-    if (!student) {
-        console.error("Student ID not found in database:", id);
-        alert("വിദ്യാർത്ഥിയുടെ വിവരങ്ങൾ ലഭ്യമല്ല!");
-        return;
-    }
+        function openQuickPreviewModal(id) {
+            // 1. ഡാറ്റാബേസിൽ നിന്ന് ഈ ID-യിലുള്ള സ്റ്റുഡന്റ് ഡാറ്റ ഉണ്ടോ എന്ന് പരിശോധിക്കുന്നു
+            const student = globalStudentsDb[id];
+            if (!student) {
+                console.error("Student ID not found in database:", id);
+                alert("വിദ്യാർത്ഥിയുടെ വിവരങ്ങൾ ലഭ്യമല്ല!");
+                return;
+            }
 
-    // 2. മോഡൽ എലമെന്റ് ഉണ്ടോ എന്ന് ഉറപ്പുവരുത്തുന്നു
-    const modal = document.getElementById('quick-preview-modal');
-    if (!modal) {
-        console.error("Preview modal element not found!");
-        return;
-    }
+            // 2. മോഡൽ എലമെന്റ് ഉണ്ടോ എന്ന് ഉറപ്പുവരുത്തുന്നു
+            const modal = document.getElementById('quick-preview-modal');
+            if (!modal) {
+                console.error("Preview modal element not found!");
+                return;
+            }
 
-    // 3. മോഡലിനുള്ളിലെ കണ്ടന്റ് നിർമ്മിക്കുന്നു (നിങ്ങളുടെ നിലവിലുള്ള HTML ലോജിക്)
-    let reportHTML = "";
-    if (student.examMonths && student.examMonths.length > 0) {
-        student.examMonths.forEach(m => {
-            let tableRows = "";
-            m.subjects.forEach(sub => {
-                let activityCount = sub.activities.length;
-                if (activityCount === 0) {
-                    tableRows += `<tr><td style="font-weight:bold; background:#f8fafc; border:1px solid #cbd5e1; padding:8px;">${sub.title}</td><td style="border:1px solid #cbd5e1; padding:8px;">—</td><td style="text-align:center; border:1px solid #cbd5e1; padding:8px;">—</td></tr>`;
-                } else {
-                    sub.activities.forEach((act, idx) => {
-                        if (idx === 0) {
-                            tableRows += `<tr><td rowspan="${activityCount}" style="font-weight:bold; vertical-align:middle; background:#f8fafc; color:#0f172a; border:1px solid #cbd5e1; padding:8px; width:180px;">${sub.title}</td><td style="border:1px solid #cbd5e1; padding:8px;">${act.name}</td><td style="text-align:center; font-weight:bold; color:#4f46e5; border:1px solid #cbd5e1; padding:8px; width:80px;">${act.grade}</td></tr>`;
+            // 3. മോഡലിനുള്ളിലെ കണ്ടന്റ് നിർമ്മിക്കുന്നു (നിങ്ങളുടെ നിലവിലുള്ള HTML ലോജിക്)
+            let reportHTML = "";
+            if (student.examMonths && student.examMonths.length > 0) {
+                student.examMonths.forEach(m => {
+                    let tableRows = "";
+                    m.subjects.forEach(sub => {
+                        let activityCount = sub.activities.length;
+                        if (activityCount === 0) {
+                            tableRows += `<tr><td style="font-weight:bold; background:#f8fafc; border:1px solid #cbd5e1; padding:8px;">${sub.title}</td><td style="border:1px solid #cbd5e1; padding:8px;">—</td><td style="text-align:center; border:1px solid #cbd5e1; padding:8px;">—</td></tr>`;
                         } else {
-                            tableRows += `<tr><td style="border:1px solid #cbd5e1; padding:8px;">${act.name}</td><td style="text-align:center; font-weight:bold; color:#4f46e5; border:1px solid #cbd5e1; padding:8px;">${act.grade}</td></tr>`;
+                            sub.activities.forEach((act, idx) => {
+                                if (idx === 0) {
+                                    tableRows += `<tr><td rowspan="${activityCount}" style="font-weight:bold; vertical-align:middle; background:#f8fafc; color:#0f172a; border:1px solid #cbd5e1; padding:8px; width:180px;">${sub.title}</td><td style="border:1px solid #cbd5e1; padding:8px;">${act.name}</td><td style="text-align:center; font-weight:bold; color:#4f46e5; border:1px solid #cbd5e1; padding:8px; width:80px;">${act.grade}</td></tr>`;
+                                } else {
+                                    tableRows += `<tr><td style="border:1px solid #cbd5e1; padding:8px;">${act.name}</td><td style="text-align:center; font-weight:bold; color:#4f46e5; border:1px solid #cbd5e1; padding:8px;">${act.grade}</td></tr>`;
+                                }
+                            });
                         }
                     });
-                }
-            });
 
-            reportHTML += `
+                    reportHTML += `
                 <div style="margin-top:15px; background:#ffffff; padding:10px; border-radius:6px; border:1px solid #e2e8f0;">
                     <h4 style="color:#4f46e5; font-size:13px; margin:0 0 8px 0; border-left:4px solid #4f46e5; padding-left:8px;">📅 Term/Month: ${m.monthName || 'General Term'}</h4>
                     <table class="academic-printable-table" style="width:100%; border-collapse:collapse; font-size:13px;">
@@ -679,16 +703,16 @@
                     </table>
                 </div>
             `;
-        });
-    }
+                });
+            }
 
-    // Major Exams HTML ജനറേഷൻ
-    const savedMajors = student.majorExams || {};
-    let majorRowsHTML = "";
-    majorExamsSubjects.forEach(sub => {
-        const subKey = sub.replace(/\s+/g, '');
-        const subGrades = savedMajors[subKey] || { onam: "", christmas: "", annual: "" };
-        majorRowsHTML += `
+            // Major Exams HTML ജനറേഷൻ
+            const savedMajors = student.majorExams || {};
+            let majorRowsHTML = "";
+            majorExamsSubjects.forEach(sub => {
+                const subKey = sub.replace(/\s+/g, '');
+                const subGrades = savedMajors[subKey] || { onam: "", christmas: "", annual: "" };
+                majorRowsHTML += `
             <tr>
                 <td style="border:1px solid #cbd5e1; padding:8px; font-weight:600;">${sub}</td>
                 <td style="border:1px solid #cbd5e1; padding:8px; text-align:center; font-weight:bold; color:#10b981;">${subGrades.onam || '—'}</td>
@@ -696,12 +720,12 @@
                 <td style="border:1px solid #cbd5e1; padding:8px; text-align:center; font-weight:bold; color:#10b981;">${subGrades.annual || '—'}</td>
             </tr>
         `;
-    });
+            });
 
-    const photo = student.bio.photo ? `<img src="${student.bio.photo}" style="width:90px; height:90px; object-fit:cover; border:1px solid #cbd5e1; border-radius:6px; float:right; margin-left:15px;">` : `<div style="width:90px; height:90px; border:1px dashed #cbd5e1; background:#f8fafc; display:flex; align-items:center; justify-content:center; float:right; font-size:11px; color:#94a3b8; margin-left:15px;">No Photo</div>`;
+            const photo = student.bio.photo ? `<img src="${student.bio.photo}" style="width:90px; height:90px; object-fit:cover; border:1px solid #cbd5e1; border-radius:6px; float:right; margin-left:15px;">` : `<div style="width:90px; height:90px; border:1px dashed #cbd5e1; background:#f8fafc; display:flex; align-items:center; justify-content:center; float:right; font-size:11px; color:#94a3b8; margin-left:15px;">No Photo</div>`;
 
-    // 4. Modal body update
-    document.getElementById('preview-modal-body-content').innerHTML = `
+            // 4. Modal body update
+            document.getElementById('preview-modal-body-content').innerHTML = `
         <div style="overflow:hidden; margin-bottom:15px; border-bottom:2px solid #e2e8f0; padding-bottom:15px;">
             ${photo}
             <h2 style="text-align:left; margin:0 0 5px 0; color:#0f172a; font-size:20px;">${student.bio.name || '—'}</h2>
@@ -745,16 +769,16 @@
         <p style="font-size:13px; line-height:1.5; white-space: pre-line; background:#f8fafc; padding:12px; border-radius:6px; border:1px solid #e2e8f0; margin:0;">${student.remarks || 'No behavioral notes recorded.'}</p>
     `;
 
-    // 5. പ്രിന്റ് ബട്ടൺ ലിസണർ സെറ്റ് ചെയ്യുന്നു
-    document.getElementById('preview-modal-print-btn').onclick = function () {
-        closeQuickPreviewModal();
-        loadStudentForEditing(id);
-        setTimeout(() => { triggerDirectPrint(); }, 300);
-    };
+            // 5. പ്രിന്റ് ബട്ടൺ ലിസണർ സെറ്റ് ചെയ്യുന്നു
+            document.getElementById('preview-modal-print-btn').onclick = function () {
+                closeQuickPreviewModal();
+                loadStudentForEditing(id);
+                setTimeout(() => { triggerDirectPrint(); }, 300);
+            };
 
-    // 6. മോഡൽ കാണിക്കുന്നു
-    modal.classList.add('active');
-}
+            // 6. മോഡൽ കാണിക്കുന്നു
+            modal.classList.add('active');
+        }
 
 
         function closeQuickPreviewModal() { document.getElementById('quick-preview-modal').classList.remove('active'); }
@@ -976,74 +1000,74 @@
         }
 
         function saveCurrentStudentData() {
-    if (!activeStudentId) return;
-    const target = globalStudentsDb[activeStudentId];
+            if (!activeStudentId) return;
+            const target = globalStudentsDb[activeStudentId];
 
-    // 1. Bio വിവരങ്ങൾ സേവ് ചെയ്യുന്നു
-    target.bio.name = document.getElementById('bio-name').value;
-    target.bio.gender = document.getElementById('bio-gender').value;
-    target.bio.classYear = document.getElementById('bio-class').value;
-    target.bio.admDate = document.getElementById('bio-adm-date').value;
-    target.bio.bloodGroup = document.getElementById('bio-blood').value;
-    target.bio.dob = document.getElementById('bio-dob').value;
-    target.bio.aadhaar = "[Aadhaar Redacted]"; // നിയമപ്രകാരം ഈ നമ്പർ കാണിക്കാൻ പാടില്ല
-    target.bio.caste = document.getElementById('bio-caste').value;
-    target.bio.religion = document.getElementById('bio-religion').value;
-    target.bio.nationality = document.getElementById('bio-nationality').value;
-    target.bio.phone = document.getElementById('bio-phone').value;
-    target.bio.address = document.getElementById('bio-address').value;
-    target.bio.father = document.getElementById('bio-father').value;
-    target.bio.mother = document.getElementById('bio-mother').value;
-    target.bio.siblings = document.getElementById('bio-siblings').value;
-    target.bio.familyStructure = document.getElementById('bio-family-type').value;
-    target.bio.photo = tempBase64Photo;
-    target.remarks = document.getElementById('teacher-notes').value;
+            // 1. Bio വിവരങ്ങൾ സേവ് ചെയ്യുന്നു
+            target.bio.name = document.getElementById('bio-name').value;
+            target.bio.gender = document.getElementById('bio-gender').value;
+            target.bio.classYear = document.getElementById('bio-class').value;
+            target.bio.admDate = document.getElementById('bio-adm-date').value;
+            target.bio.bloodGroup = document.getElementById('bio-blood').value;
+            target.bio.dob = document.getElementById('bio-dob').value;
+            target.bio.aadhaar = "[Aadhaar Redacted]"; // നിയമപ്രകാരം ഈ നമ്പർ കാണിക്കാൻ പാടില്ല
+            target.bio.caste = document.getElementById('bio-caste').value;
+            target.bio.religion = document.getElementById('bio-religion').value;
+            target.bio.nationality = document.getElementById('bio-nationality').value;
+            target.bio.phone = document.getElementById('bio-phone').value;
+            target.bio.address = document.getElementById('bio-address').value;
+            target.bio.father = document.getElementById('bio-father').value;
+            target.bio.mother = document.getElementById('bio-mother').value;
+            target.bio.siblings = document.getElementById('bio-siblings').value;
+            target.bio.familyStructure = document.getElementById('bio-family-type').value;
+            target.bio.photo = tempBase64Photo;
+            target.remarks = document.getElementById('teacher-notes').value;
 
-    // 2. Major Exams വിവരങ്ങൾ സേവ് ചെയ്യുന്നു
-    const majorExamsMap = {};
-    majorExamsSubjects.forEach(sub => {
-        const subKey = sub.replace(/\s+/g, '');
-        majorExamsMap[subKey] = {
-            onam: document.getElementById(`major-grade-onam-${subKey}`).value,
-            christmas: document.getElementById(`major-grade-christmas-${subKey}`).value,
-            annual: document.getElementById(`major-grade-annual-${subKey}`).value
-        };
-    });
-    target.majorExams = majorExamsMap;
-
-    // 3. Exam Months വിവരങ്ങൾ സേവ് ചെയ്യുന്നു
-    target.examMonths = [];
-    document.querySelectorAll('#months-wrapper .month-node').forEach(mCard => {
-        const mName = mCard.querySelector('.month-name-input').value || "General Term";
-        const subjectsList = [];
-
-        mCard.querySelectorAll('.subject-node').forEach(sBox => {
-            const sTitle = sBox.querySelector('.subject-title-input').value || "General Subject";
-            const actsList = [];
-            sBox.querySelectorAll('.activity-item-row').forEach(row => {
-                actsList.push({
-                    name: row.querySelector('.act-name-input').value || "Evaluation",
-                    grade: row.querySelector('.act-grade-input').value
-                });
+            // 2. Major Exams വിവരങ്ങൾ സേവ് ചെയ്യുന്നു
+            const majorExamsMap = {};
+            majorExamsSubjects.forEach(sub => {
+                const subKey = sub.replace(/\s+/g, '');
+                majorExamsMap[subKey] = {
+                    onam: document.getElementById(`major-grade-onam-${subKey}`).value,
+                    christmas: document.getElementById(`major-grade-christmas-${subKey}`).value,
+                    annual: document.getElementById(`major-grade-annual-${subKey}`).value
+                };
             });
-            subjectsList.push({ title: sTitle, activities: actsList });
-        });
-        target.examMonths.push({ monthName: mName, subjects: subjectsList });
-    });
+            target.majorExams = majorExamsMap;
 
-    // 4. ലോക്കൽ സ്റ്റോറേജിൽ സേവ് ചെയ്യുന്നു (പേജ് റിഫ്രഷ് ആകുമ്പോൾ വേഗത്തിൽ കിട്ടാൻ)
-    localStorage.setItem('classroom_hub_nested_v3_2026', JSON.stringify(globalStudentsDb));
+            // 3. Exam Months വിവരങ്ങൾ സേവ് ചെയ്യുന്നു
+            target.examMonths = [];
+            document.querySelectorAll('#months-wrapper .month-node').forEach(mCard => {
+                const mName = mCard.querySelector('.month-name-input').value || "General Term";
+                const subjectsList = [];
 
-    // 5. ഫയർബേസിലേക്ക് ഡാറ്റ അപ്‌ഡേറ്റ് ചെയ്യുന്നു (ഇതാണ് ഏറ്റവും പ്രധാനം)
-    db.collection("schoolData").doc("studentsDb").set(globalStudentsDb)
-        .then(() => {
-            console.log("Data successfully synced to Firebase!");
-            updateDashboardDirectory();
-        })
-        .catch((error) => {
-            console.error("Error updating Firebase: ", error);
-        });
-}
+                mCard.querySelectorAll('.subject-node').forEach(sBox => {
+                    const sTitle = sBox.querySelector('.subject-title-input').value || "General Subject";
+                    const actsList = [];
+                    sBox.querySelectorAll('.activity-item-row').forEach(row => {
+                        actsList.push({
+                            name: row.querySelector('.act-name-input').value || "Evaluation",
+                            grade: row.querySelector('.act-grade-input').value
+                        });
+                    });
+                    subjectsList.push({ title: sTitle, activities: actsList });
+                });
+                target.examMonths.push({ monthName: mName, subjects: subjectsList });
+            });
+
+            // 4. ലോക്കൽ സ്റ്റോറേജിൽ സേവ് ചെയ്യുന്നു (പേജ് റിഫ്രഷ് ആകുമ്പോൾ വേഗത്തിൽ കിട്ടാൻ)
+            localStorage.setItem('classroom_hub_nested_v3_2026', JSON.stringify(globalStudentsDb));
+
+            // 5. ഫയർബേസിലേക്ക് ഡാറ്റ അപ്‌ഡേറ്റ് ചെയ്യുന്നു (ഇതാണ് ഏറ്റവും പ്രധാനം)
+            db.collection("schoolData").doc("studentsDb").set(globalStudentsDb)
+                .then(() => {
+                    console.log("Data successfully synced to Firebase!");
+                    updateDashboardDirectory();
+                })
+                .catch((error) => {
+                    console.error("Error updating Firebase: ", error);
+                });
+        }
 
 
         function finishAndReturnHome() {
@@ -1192,4 +1216,4 @@
     </script>
 </body>
 
-</html> 
+</html>
