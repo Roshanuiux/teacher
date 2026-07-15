@@ -612,123 +612,134 @@
             });
         }
 
-        function openQuickPreviewModal(id) {
-            const student = globalStudentsDb[id];
-            if (!student) return;
+      function openQuickPreviewModal(id) {
+    // 1. ഡാറ്റാബേസിൽ നിന്ന് ഈ ID-യിലുള്ള സ്റ്റുഡന്റ് ഡാറ്റ ഉണ്ടോ എന്ന് പരിശോധിക്കുന്നു
+    const student = globalStudentsDb[id];
+    if (!student) {
+        console.error("Student ID not found in database:", id);
+        alert("വിദ്യാർത്ഥിയുടെ വിവരങ്ങൾ ലഭ്യമല്ല!");
+        return;
+    }
 
-            let reportHTML = "";
-            if (student.examMonths && student.examMonths.length > 0) {
-                student.examMonths.forEach(m => {
-                    let tableRows = "";
-                    m.subjects.forEach(sub => {
-                        let activityCount = sub.activities.length;
-                        if (activityCount === 0) {
-                            tableRows += `<tr><td style="font-weight:bold; background:#f8fafc; border:1px solid #cbd5e1; padding:8px;">${sub.title}</td><td style="border:1px solid #cbd5e1; padding:8px;">—</td><td style="text-align:center; border:1px solid #cbd5e1; padding:8px;">—</td></tr>`;
+    // 2. മോഡൽ എലമെന്റ് ഉണ്ടോ എന്ന് ഉറപ്പുവരുത്തുന്നു
+    const modal = document.getElementById('quick-preview-modal');
+    if (!modal) {
+        console.error("Preview modal element not found!");
+        return;
+    }
+
+    // 3. മോഡലിനുള്ളിലെ കണ്ടന്റ് നിർമ്മിക്കുന്നു (നിങ്ങളുടെ നിലവിലുള്ള HTML ലോജിക്)
+    let reportHTML = "";
+    if (student.examMonths && student.examMonths.length > 0) {
+        student.examMonths.forEach(m => {
+            let tableRows = "";
+            m.subjects.forEach(sub => {
+                let activityCount = sub.activities.length;
+                if (activityCount === 0) {
+                    tableRows += `<tr><td style="font-weight:bold; background:#f8fafc; border:1px solid #cbd5e1; padding:8px;">${sub.title}</td><td style="border:1px solid #cbd5e1; padding:8px;">—</td><td style="text-align:center; border:1px solid #cbd5e1; padding:8px;">—</td></tr>`;
+                } else {
+                    sub.activities.forEach((act, idx) => {
+                        if (idx === 0) {
+                            tableRows += `<tr><td rowspan="${activityCount}" style="font-weight:bold; vertical-align:middle; background:#f8fafc; color:#0f172a; border:1px solid #cbd5e1; padding:8px; width:180px;">${sub.title}</td><td style="border:1px solid #cbd5e1; padding:8px;">${act.name}</td><td style="text-align:center; font-weight:bold; color:#4f46e5; border:1px solid #cbd5e1; padding:8px; width:80px;">${act.grade}</td></tr>`;
                         } else {
-                            sub.activities.forEach((act, idx) => {
-                                if (idx === 0) {
-                                    tableRows += `<tr><td rowspan="${activityCount}" style="font-weight:bold; vertical-align:middle; background:#f8fafc; color:#0f172a; border:1px solid #cbd5e1; padding:8px; width:180px;">${sub.title}</td><td style="border:1px solid #cbd5e1; padding:8px;">${act.name}</td><td style="text-align:center; font-weight:bold; color:#4f46e5; border:1px solid #cbd5e1; padding:8px; width:80px;">${act.grade}</td></tr>`;
-                                } else {
-                                    tableRows += `<tr><td style="border:1px solid #cbd5e1; padding:8px;">${act.name}</td><td style="text-align:center; font-weight:bold; color:#4f46e5; border:1px solid #cbd5e1; padding:8px;">${act.grade}</td></tr>`;
-                                }
-                            });
+                            tableRows += `<tr><td style="border:1px solid #cbd5e1; padding:8px;">${act.name}</td><td style="text-align:center; font-weight:bold; color:#4f46e5; border:1px solid #cbd5e1; padding:8px;">${act.grade}</td></tr>`;
                         }
                     });
-
-                    reportHTML += `
-                        <div style="margin-top:15px; background:#ffffff; padding:10px; border-radius:6px; border:1px solid #e2e8f0;">
-                            <h4 style="color:#4f46e5; font-size:13px; margin:0 0 8px 0; border-left:4px solid #4f46e5; padding-left:8px;">📅 Term/Month: ${m.monthName || 'General Term'}</h4>
-                            <table class="academic-printable-table" style="width:100%; border-collapse:collapse; font-size:13px;">
-                                <thead>
-                                    <tr style="background:#f1f5f9; color:#334155;">
-                                        <th style="border:1px solid #cbd5e1; padding:6px; text-align:left;">Subject</th>
-                                        <th style="border:1px solid #cbd5e1; padding:6px; text-align:left;">Activity Description</th>
-                                        <th style="border:1px solid #cbd5e1; padding:6px; text-align:center;">Grade</th>
-                                    </tr>
-                                </thead>
-                                <tbody>${tableRows || '<tr><td colspan="3" style="text-align:center; padding:8px; color:#94a3b8;">No Records Entered</td></tr>'}</tbody>
-                            </table>
-                        </div>
-                    `;
-                });
-            }
-
-            const savedMajors = student.majorExams || {};
-            let majorRowsHTML = "";
-            majorExamsSubjects.forEach(sub => {
-                const subKey = sub.replace(/\s+/g, '');
-                const subGrades = savedMajors[subKey] || { onam: "", christmas: "", annual: "" };
-                majorRowsHTML += `
-                    <tr>
-                        <td style="border:1px solid #cbd5e1; padding:8px; font-weight:600;">${sub}</td>
-                        <td style="border:1px solid #cbd5e1; padding:8px; text-align:center; font-weight:bold; color:#10b981;">${subGrades.onam || '—'}</td>
-                        <td style="border:1px solid #cbd5e1; padding:8px; text-align:center; font-weight:bold; color:#10b981;">${subGrades.christmas || '—'}</td>
-                        <td style="border:1px solid #cbd5e1; padding:8px; text-align:center; font-weight:bold; color:#10b981;">${subGrades.annual || '—'}</td>
-                    </tr>
-                `;
+                }
             });
 
-            let majorExamsHTML = `
-                <div style="margin-top:15px; background:#ffffff; padding:10px; border-radius:6px; border:1px solid #cbd5e1;">
-                    <table style="width:100%; border-collapse:collapse; font-size:13px;">
+            reportHTML += `
+                <div style="margin-top:15px; background:#ffffff; padding:10px; border-radius:6px; border:1px solid #e2e8f0;">
+                    <h4 style="color:#4f46e5; font-size:13px; margin:0 0 8px 0; border-left:4px solid #4f46e5; padding-left:8px;">📅 Term/Month: ${m.monthName || 'General Term'}</h4>
+                    <table class="academic-printable-table" style="width:100%; border-collapse:collapse; font-size:13px;">
                         <thead>
                             <tr style="background:#f1f5f9; color:#334155;">
-                                <th style="border:1px solid #cbd5e1; padding:8px; text-align:left;">Subject</th>
-                                <th style="border:1px solid #cbd5e1; padding:8px; text-align:center;">First Terminal (Onam)</th>
-                                <th style="border:1px solid #cbd5e1; padding:8px; text-align:center;">Second Terminal (Christmas)</th>
-                                <th style="border:1px solid #cbd5e1; padding:8px; text-align:center;">Annual Exam (Final)</th>
+                                <th style="border:1px solid #cbd5e1; padding:6px; text-align:left;">Subject</th>
+                                <th style="border:1px solid #cbd5e1; padding:6px; text-align:left;">Activity Description</th>
+                                <th style="border:1px solid #cbd5e1; padding:6px; text-align:center;">Grade</th>
                             </tr>
                         </thead>
-                        <tbody>${majorRowsHTML}</tbody>
+                        <tbody>${tableRows || '<tr><td colspan="3" style="text-align:center; padding:8px; color:#94a3b8;">No Records Entered</td></tr>'}</tbody>
                     </table>
                 </div>
             `;
+        });
+    }
 
-            const photo = student.bio.photo ? `<img src="${student.bio.photo}" style="width:90px; height:90px; object-fit:cover; border:1px solid #cbd5e1; border-radius:6px; float:right; margin-left:15px;">` : `<div style="width:90px; height:90px; border:1px dashed #cbd5e1; background:#f8fafc; display:flex; align-items:center; justify-content:center; float:right; font-size:11px; color:#94a3b8; margin-left:15px;">No Photo</div>`;
+    // Major Exams HTML ജനറേഷൻ
+    const savedMajors = student.majorExams || {};
+    let majorRowsHTML = "";
+    majorExamsSubjects.forEach(sub => {
+        const subKey = sub.replace(/\s+/g, '');
+        const subGrades = savedMajors[subKey] || { onam: "", christmas: "", annual: "" };
+        majorRowsHTML += `
+            <tr>
+                <td style="border:1px solid #cbd5e1; padding:8px; font-weight:600;">${sub}</td>
+                <td style="border:1px solid #cbd5e1; padding:8px; text-align:center; font-weight:bold; color:#10b981;">${subGrades.onam || '—'}</td>
+                <td style="border:1px solid #cbd5e1; padding:8px; text-align:center; font-weight:bold; color:#10b981;">${subGrades.christmas || '—'}</td>
+                <td style="border:1px solid #cbd5e1; padding:8px; text-align:center; font-weight:bold; color:#10b981;">${subGrades.annual || '—'}</td>
+            </tr>
+        `;
+    });
 
-            document.getElementById('preview-modal-body-content').innerHTML = `
-                <div style="overflow:hidden; margin-bottom:15px; border-bottom:2px solid #e2e8f0; padding-bottom:15px;">
-                    ${photo}
-                    <h2 style="text-align:left; margin:0 0 5px 0; color:#0f172a; font-size:20px;">${student.bio.name || '—'}</h2>
-                    <p style="margin:0; font-size:13px; color:#64748b;">Admission ID No: <strong>${student.bio.admissionNo || '—'}</strong> | Class: <strong>${student.bio.classYear || '—'}</strong></p>
-                </div>
-                
-                <h5 style="margin:15px 0 8px 0; color:#0f172a; font-size:13px; text-transform:uppercase; letter-spacing:0.5px; border-bottom:1px solid #e2e8f0; padding-bottom:3px;">1. Personal Details</h5>
-                <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap:10px; font-size:13px; margin-bottom:15px;">
-                    <div><span style="color:#64748b;">Gender:</span> ${student.bio.gender || '—'}</div>
-                    <div><span style="color:#64748b;">DOB:</span> ${student.bio.dob || '—'}</div>
-                    <div><span style="color:#64748b;">Blood Group:</span> <strong style="color:#ef4444;">${student.bio.bloodGroup || '—'}</strong></div>
-                    <div><span style="color:#64748b;">Phone:</span> ${student.bio.phone || '—'}</div>
-                    <div><span style="color:#64748b;">Aadhaar:</span> ${student.bio.aadhaar || '—'}</div>
-                    <div><span style="color:#64748b;">Religion/Caste:</span> ${student.bio.religion || '—'} / ${student.bio.caste || '—'}</div>
-                </div>
-                <div style="font-size:13px; margin-bottom:20px;"><span style="color:#64748b;">Home Address:</span> ${student.bio.address || '—'}</div>
+    const photo = student.bio.photo ? `<img src="${student.bio.photo}" style="width:90px; height:90px; object-fit:cover; border:1px solid #cbd5e1; border-radius:6px; float:right; margin-left:15px;">` : `<div style="width:90px; height:90px; border:1px dashed #cbd5e1; background:#f8fafc; display:flex; align-items:center; justify-content:center; float:right; font-size:11px; color:#94a3b8; margin-left:15px;">No Photo</div>`;
 
-                <h5 style="margin:15px 0 8px 0; color:#0f172a; font-size:13px; text-transform:uppercase; letter-spacing:0.5px; border-bottom:1px solid #e2e8f0; padding-bottom:3px;">2. Family & Background</h5>
-                <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap:10px; font-size:13px; margin-bottom:20px;">
-                    <div><span style="color:#64748b;">Father's Name/Job:</span> ${student.bio.father || '—'}</div>
-                    <div><span style="color:#64748b;">Mother's Name/Job:</span> ${student.bio.mother || '—'}</div>
-                    <div><span style="color:#64748b;">Family Structure:</span> ${student.bio.familyStructure || '—'}</div>
-                </div>
+    // 4. Modal body update
+    document.getElementById('preview-modal-body-content').innerHTML = `
+        <div style="overflow:hidden; margin-bottom:15px; border-bottom:2px solid #e2e8f0; padding-bottom:15px;">
+            ${photo}
+            <h2 style="text-align:left; margin:0 0 5px 0; color:#0f172a; font-size:20px;">${student.bio.name || '—'}</h2>
+            <p style="margin:0; font-size:13px; color:#64748b;">Admission ID No: <strong>${student.bio.admissionNo || '—'}</strong> | Class: <strong>${student.bio.classYear || '—'}</strong></p>
+        </div>
+        
+        <h5 style="margin:15px 0 8px 0; color:#0f172a; font-size:13px; text-transform:uppercase; letter-spacing:0.5px; border-bottom:1px solid #e2e8f0; padding-bottom:3px;">1. Personal Details</h5>
+        <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap:10px; font-size:13px; margin-bottom:15px;">
+            <div><span style="color:#64748b;">Gender:</span> ${student.bio.gender || '—'}</div>
+            <div><span style="color:#64748b;">DOB:</span> ${student.bio.dob || '—'}</div>
+            <div><span style="color:#64748b;">Blood Group:</span> <strong style="color:#ef4444;">${student.bio.bloodGroup || '—'}</strong></div>
+            <div><span style="color:#64748b;">Phone:</span> ${student.bio.phone || '—'}</div>
+            <div><span style="color:#64748b;">Aadhaar:</span> [Redacted]</div>
+            <div><span style="color:#64748b;">Religion/Caste:</span> ${student.bio.religion || '—'} / ${student.bio.caste || '—'}</div>
+        </div>
+        <div style="font-size:13px; margin-bottom:20px;"><span style="color:#64748b;">Home Address:</span> ${student.bio.address || '—'}</div>
 
-                <h5 style="margin:15px 0 8px 0; color:#0f172a; font-size:13px; text-transform:uppercase; letter-spacing:0.5px; border-bottom:1px solid #e2e8f0; padding-bottom:3px;">3. Major Curriculum Board Exams (Kerala Milestone)</h5>
-                ${majorExamsHTML}
+        <h5 style="margin:15px 0 8px 0; color:#0f172a; font-size:13px; text-transform:uppercase; letter-spacing:0.5px; border-bottom:1px solid #e2e8f0; padding-bottom:3px;">2. Family & Background</h5>
+        <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap:10px; font-size:13px; margin-bottom:20px;">
+            <div><span style="color:#64748b;">Father's Name/Job:</span> ${student.bio.father || '—'}</div>
+            <div><span style="color:#64748b;">Mother's Name/Job:</span> ${student.bio.mother || '—'}</div>
+            <div><span style="color:#64748b;">Family Structure:</span> ${student.bio.familyStructure || '—'}</div>
+        </div>
 
-                <h5 style="margin:20px 0 8px 0; color:#0f172a; font-size:13px; text-transform:uppercase; letter-spacing:0.5px; border-bottom:1px solid #e2e8f0; padding-bottom:3px;">4. Cumulative Academic Evaluation Logs</h5>
-                ${reportHTML || '<p style="font-size:13px; color:#94a3b8;">No academic matrix blocks linked yet.</p>'}
-                
-                <h5 style="margin:20px 0 8px 0; color:#0f172a; font-size:13px; text-transform:uppercase; letter-spacing:0.5px; border-bottom:1px solid #e2e8f0; padding-bottom:3px;">5. Teacher Remarks Matrix</h5>
-                <p style="font-size:13px; line-height:1.5; white-space: pre-line; background:#f8fafc; padding:12px; border-radius:6px; border:1px solid #e2e8f0; margin:0;">${student.remarks || 'No behavioral notes recorded.'}</p>
-            `;
+        <h5 style="margin:15px 0 8px 0; color:#0f172a; font-size:13px; text-transform:uppercase; letter-spacing:0.5px; border-bottom:1px solid #e2e8f0; padding-bottom:3px;">3. Major Curriculum Board Exams</h5>
+        <div style="margin-top:15px; background:#ffffff; padding:10px; border-radius:6px; border:1px solid #cbd5e1;">
+            <table style="width:100%; border-collapse:collapse; font-size:13px;">
+                <thead>
+                    <tr style="background:#f1f5f9; color:#334155;">
+                        <th style="border:1px solid #cbd5e1; padding:8px; text-align:left;">Subject</th>
+                        <th style="border:1px solid #cbd5e1; padding:8px; text-align:center;">Onam</th>
+                        <th style="border:1px solid #cbd5e1; padding:8px; text-align:center;">Christmas</th>
+                        <th style="border:1px solid #cbd5e1; padding:8px; text-align:center;">Annual</th>
+                    </tr>
+                </thead>
+                <tbody>${majorRowsHTML}</tbody>
+            </table>
+        </div>
 
-            document.getElementById('preview-modal-print-btn').onclick = function () {
-                closeQuickPreviewModal();
-                loadStudentForEditing(id);
-                setTimeout(() => { triggerDirectPrint(); }, 300);
-            };
+        <h5 style="margin:20px 0 8px 0; color:#0f172a; font-size:13px; text-transform:uppercase; letter-spacing:0.5px; border-bottom:1px solid #e2e8f0; padding-bottom:3px;">4. Teacher Remarks</h5>
+        <p style="font-size:13px; line-height:1.5; white-space: pre-line; background:#f8fafc; padding:12px; border-radius:6px; border:1px solid #e2e8f0; margin:0;">${student.remarks || 'No behavioral notes recorded.'}</p>
+    `;
 
-            document.getElementById('quick-preview-modal').classList.add('active');
-        }
+    // 5. പ്രിന്റ് ബട്ടൺ ലിസണർ സെറ്റ് ചെയ്യുന്നു
+    document.getElementById('preview-modal-print-btn').onclick = function () {
+        closeQuickPreviewModal();
+        loadStudentForEditing(id);
+        setTimeout(() => { triggerDirectPrint(); }, 300);
+    };
+
+    // 6. മോഡൽ കാണിക്കുന്നു
+    modal.classList.add('active');
+}
+
 
         function closeQuickPreviewModal() { document.getElementById('quick-preview-modal').classList.remove('active'); }
 
