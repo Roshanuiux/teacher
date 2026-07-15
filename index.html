@@ -488,31 +488,45 @@
 
         const majorExamsSubjects = ["Malayalam", "English", "Hindi", "Maths", "Science", "Social Science"];
 
-        window.onload = function () {
-            if (!document.getElementById('quick-preview-modal')) {
-                const pModal = document.createElement('div');
-                pModal.id = 'quick-preview-modal';
-                pModal.className = 'modal-overlay';
-                pModal.style.zIndex = '9999';
-                pModal.innerHTML = `
-                    <div class="modal-window" style="max-width: 850px; width:90%; max-height:85vh; overflow-y:auto; padding:0;">
-                        <div class="modal-header" style="position:sticky; top:0; background:#fff; z-index:10; padding:15px 25px; border-bottom:1px solid #e2e8f0;">
-                            <h2 style="margin:0; font-size:18px;">✨ Student Profile Quick Preview</h2>
-                            <div style="display:flex; gap:10px;">
-                                <button class="btn btn-accent" id="preview-modal-print-btn" style="padding:6px 14px; font-size:13px;">🖨️ Print / Save PDF</button>
-                                <button class="close-btn" onclick="closeQuickPreviewModal()" style="position:static; font-size:20px;">✕</button>
-                            </div>
-                        </div>
-                        <div id="preview-modal-body-content" style="padding: 25px; background:#fff;"></div>
+      window.onload = function () {
+    // 1. Initial setup for the preview modal
+    if (!document.getElementById('quick-preview-modal')) {
+        const pModal = document.createElement('div');
+        pModal.id = 'quick-preview-modal';
+        pModal.className = 'modal-overlay';
+        pModal.style.zIndex = '9999';
+        pModal.innerHTML = `
+            <div class="modal-window" style="max-width: 850px; width:90%; max-height:85vh; overflow-y:auto; padding:0;">
+                <div class="modal-header" style="position:sticky; top:0; background:#fff; z-index:10; padding:15px 25px; border-bottom:1px solid #e2e8f0;">
+                    <h2 style="margin:0; font-size:18px;">✨ Student Profile Quick Preview</h2>
+                    <div style="display:flex; gap:10px;">
+                        <button class="btn btn-accent" id="preview-modal-print-btn" style="padding:6px 14px; font-size:13px;">🖨️ Print / Save PDF</button>
+                        <button class="close-btn" onclick="closeQuickPreviewModal()" style="position:static; font-size:20px;">✕</button>
                     </div>
-                `;
-                document.body.appendChild(pModal);
-            }
+                </div>
+                <div id="preview-modal-body-content" style="padding: 25px; background:#fff;"></div>
+            </div>
+        `;
+        document.body.appendChild(pModal);
+    }
 
-            initMajorExamsTableStructure();
-            loadDatabaseFromStorage();
-            switchTab('tab-dashboard');
-        };
+    // 2. Setup tables and data
+    initMajorExamsTableStructure();
+    
+    // 3. First load from localStorage (Fast load)
+    const localData = localStorage.getItem('classroom_hub_nested_v3_2026');
+    if (localData) {
+        globalStudentsDb = JSON.parse(localData);
+        updateDashboardDirectory();
+    }
+
+    // 4. Sync with Firebase (Updates the latest data)
+    loadDatabaseFromStorage(); 
+    
+    // 5. Default tab
+    switchTab('tab-dashboard');
+};
+
 
         function initMajorExamsTableStructure() {
             const tbody = document.getElementById('major-exams-tbody');
@@ -1151,4 +1165,4 @@
     </script>
 </body>
 
-</html>
+</html> 
