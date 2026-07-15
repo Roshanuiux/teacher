@@ -949,61 +949,75 @@
         }
 
         function saveCurrentStudentData() {
-            if (!activeStudentId) return;
-            const target = globalStudentsDb[activeStudentId];
+    if (!activeStudentId) return;
+    const target = globalStudentsDb[activeStudentId];
 
-            target.bio.name = document.getElementById('bio-name').value;
-            target.bio.gender = document.getElementById('bio-gender').value;
-            target.bio.classYear = document.getElementById('bio-class').value;
-            target.bio.admDate = document.getElementById('bio-adm-date').value;
-            target.bio.bloodGroup = document.getElementById('bio-blood').value;
-            target.bio.dob = document.getElementById('bio-dob').value;
-            target.bio.aadhaar = document.getElementById('bio-aadhaar').value;
-            target.bio.caste = document.getElementById('bio-caste').value;
-            target.bio.religion = document.getElementById('bio-religion').value;
-            target.bio.nationality = document.getElementById('bio-nationality').value;
-            target.bio.phone = document.getElementById('bio-phone').value;
-            target.bio.address = document.getElementById('bio-address').value;
-            target.bio.father = document.getElementById('bio-father').value;
-            target.bio.mother = document.getElementById('bio-mother').value;
-            target.bio.siblings = document.getElementById('bio-siblings').value;
-            target.bio.familyStructure = document.getElementById('bio-family-type').value;
-            target.bio.photo = tempBase64Photo;
-            target.remarks = document.getElementById('teacher-notes').value;
+    // 1. Bio വിവരങ്ങൾ സേവ് ചെയ്യുന്നു
+    target.bio.name = document.getElementById('bio-name').value;
+    target.bio.gender = document.getElementById('bio-gender').value;
+    target.bio.classYear = document.getElementById('bio-class').value;
+    target.bio.admDate = document.getElementById('bio-adm-date').value;
+    target.bio.bloodGroup = document.getElementById('bio-blood').value;
+    target.bio.dob = document.getElementById('bio-dob').value;
+    target.bio.aadhaar = "[Aadhaar Redacted]"; // നിയമപ്രകാരം ഈ നമ്പർ കാണിക്കാൻ പാടില്ല
+    target.bio.caste = document.getElementById('bio-caste').value;
+    target.bio.religion = document.getElementById('bio-religion').value;
+    target.bio.nationality = document.getElementById('bio-nationality').value;
+    target.bio.phone = document.getElementById('bio-phone').value;
+    target.bio.address = document.getElementById('bio-address').value;
+    target.bio.father = document.getElementById('bio-father').value;
+    target.bio.mother = document.getElementById('bio-mother').value;
+    target.bio.siblings = document.getElementById('bio-siblings').value;
+    target.bio.familyStructure = document.getElementById('bio-family-type').value;
+    target.bio.photo = tempBase64Photo;
+    target.remarks = document.getElementById('teacher-notes').value;
 
-            const majorExamsMap = {};
-            majorExamsSubjects.forEach(sub => {
-                const subKey = sub.replace(/\s+/g, '');
-                majorExamsMap[subKey] = {
-                    onam: document.getElementById(`major-grade-onam-${subKey}`).value,
-                    christmas: document.getElementById(`major-grade-christmas-${subKey}`).value,
-                    annual: document.getElementById(`major-grade-annual-${subKey}`).value
-                };
-            });
-            target.majorExams = majorExamsMap;
+    // 2. Major Exams വിവരങ്ങൾ സേവ് ചെയ്യുന്നു
+    const majorExamsMap = {};
+    majorExamsSubjects.forEach(sub => {
+        const subKey = sub.replace(/\s+/g, '');
+        majorExamsMap[subKey] = {
+            onam: document.getElementById(`major-grade-onam-${subKey}`).value,
+            christmas: document.getElementById(`major-grade-christmas-${subKey}`).value,
+            annual: document.getElementById(`major-grade-annual-${subKey}`).value
+        };
+    });
+    target.majorExams = majorExamsMap;
 
-            target.examMonths = [];
-            document.querySelectorAll('#months-wrapper .month-node').forEach(mCard => {
-                const mName = mCard.querySelector('.month-name-input').value || "General Term";
-                const subjectsList = [];
+    // 3. Exam Months വിവരങ്ങൾ സേവ് ചെയ്യുന്നു
+    target.examMonths = [];
+    document.querySelectorAll('#months-wrapper .month-node').forEach(mCard => {
+        const mName = mCard.querySelector('.month-name-input').value || "General Term";
+        const subjectsList = [];
 
-                mCard.querySelectorAll('.subject-node').forEach(sBox => {
-                    const sTitle = sBox.querySelector('.subject-title-input').value || "General Subject";
-                    const actsList = [];
-                    sBox.querySelectorAll('.activity-item-row').forEach(row => {
-                        actsList.push({
-                            name: row.querySelector('.act-name-input').value || "Evaluation",
-                            grade: row.querySelector('.act-grade-input').value
-                        });
-                    });
-                    subjectsList.push({ title: sTitle, activities: actsList });
+        mCard.querySelectorAll('.subject-node').forEach(sBox => {
+            const sTitle = sBox.querySelector('.subject-title-input').value || "General Subject";
+            const actsList = [];
+            sBox.querySelectorAll('.activity-item-row').forEach(row => {
+                actsList.push({
+                    name: row.querySelector('.act-name-input').value || "Evaluation",
+                    grade: row.querySelector('.act-grade-input').value
                 });
-                target.examMonths.push({ monthName: mName, subjects: subjectsList });
             });
+            subjectsList.push({ title: sTitle, activities: actsList });
+        });
+        target.examMonths.push({ monthName: mName, subjects: subjectsList });
+    });
 
-            localStorage.setItem('classroom_hub_nested_v3_2026', JSON.stringify(globalStudentsDb));
+    // 4. ലോക്കൽ സ്റ്റോറേജിൽ സേവ് ചെയ്യുന്നു (പേജ് റിഫ്രഷ് ആകുമ്പോൾ വേഗത്തിൽ കിട്ടാൻ)
+    localStorage.setItem('classroom_hub_nested_v3_2026', JSON.stringify(globalStudentsDb));
+
+    // 5. ഫയർബേസിലേക്ക് ഡാറ്റ അപ്‌ഡേറ്റ് ചെയ്യുന്നു (ഇതാണ് ഏറ്റവും പ്രധാനം)
+    db.collection("schoolData").doc("studentsDb").set(globalStudentsDb)
+        .then(() => {
+            console.log("Data successfully synced to Firebase!");
             updateDashboardDirectory();
-        }
+        })
+        .catch((error) => {
+            console.error("Error updating Firebase: ", error);
+        });
+}
+
 
         function finishAndReturnHome() {
             saveCurrentStudentData();
