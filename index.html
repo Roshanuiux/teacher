@@ -464,10 +464,10 @@
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
 
-    <!-- CORE JAVASCRIPT ENGINE (Completely Intact) -->
     <script>
         let globalStudentsDb = {};
-        // Firebase Config (നിങ്ങൾ കോപ്പി ചെയ്തത്)
+        
+        // Firebase Configuration
         const firebaseConfig = {
             apiKey: "AIzaSyCBpogXSk3CwbwFxtVbq2MDY630GDG2g8k",
             authDomain: "classroom-hub-69ddc.firebaseapp.com",
@@ -511,20 +511,24 @@
             }
 
             initMajorExamsTableStructure();
-            // പഴയ loadDatabaseFromStorage() മാറ്റി ഇത് ഉപയോഗിക്കുക
-function subscribeToDatabase() {
-    db.collection("schoolData").doc("studentsDb").onSnapshot((doc) => {
-        if (doc.exists) {
-            globalStudentsDb = doc.data();
-            console.log("Database updated live!");
-        } else {
-            globalStudentsDb = {};
-        }
-        updateDashboardDirectory();
-    }, (error) => {
-        console.error("Error fetching data: ", error);
-    });
-}
+            
+            // Live data listen cheyyanulla function
+            function subscribeToDatabase() {
+                db.collection("schoolData").doc("studentsDb").onSnapshot((doc) => {
+                    if (doc.exists) {
+                        globalStudentsDb = doc.data();
+                        console.log("Database updated live!");
+                    } else {
+                        globalStudentsDb = {};
+                    }
+                    updateDashboardDirectory();
+                }, (error) => {
+                    console.error("Error fetching data: ", error);
+                });
+            }
+
+            // Live synchronization thodangunnu
+            subscribeToDatabase();
 
             switchTab('tab-dashboard');
         };
@@ -568,22 +572,6 @@ function subscribeToDatabase() {
                     alert("ഡാറ്റ സേവ് ചെയ്യുന്നതിൽ പരാജയപ്പെട്ടു!");
                 });
         }
-
-        function loadDatabaseFromStorage() {
-            db.collection("schoolData").doc("studentsDb").get()
-                .then((doc) => {
-                    if (doc.exists) {
-                        globalStudentsDb = doc.data();
-                    } else {
-                        globalStudentsDb = {};
-                    }
-                    updateDashboardDirectory();
-                })
-                .catch((error) => {
-                    console.error("Error loading data: ", error);
-                });
-        }
-
 
         function updateDashboardDirectory() {
             const container = document.getElementById('student-list-container');
@@ -661,509 +649,21 @@ function subscribeToDatabase() {
                                         <th style="border:1px solid #cbd5e1; padding:6px; text-align:center;">Grade</th>
                                     </tr>
                                 </thead>
-                                <tbody>${tableRows || '<tr><td colspan="3" style="text-align:center; padding:8px; color:#94a3b8;">No Records Entered</td></tr>'}</tbody>
+                                <tbody>
+                                    ${tableRows}
+                                </tbody>
                             </table>
-                        </div>
-                    `;
+                        </div>`;
                 });
             }
-
-            const savedMajors = student.majorExams || {};
-            let majorRowsHTML = "";
-            majorExamsSubjects.forEach(sub => {
-                const subKey = sub.replace(/\s+/g, '');
-                const subGrades = savedMajors[subKey] || { onam: "", christmas: "", annual: "" };
-                majorRowsHTML += `
-                    <tr>
-                        <td style="border:1px solid #cbd5e1; padding:8px; font-weight:600;">${sub}</td>
-                        <td style="border:1px solid #cbd5e1; padding:8px; text-align:center; font-weight:bold; color:#10b981;">${subGrades.onam || '—'}</td>
-                        <td style="border:1px solid #cbd5e1; padding:8px; text-align:center; font-weight:bold; color:#10b981;">${subGrades.christmas || '—'}</td>
-                        <td style="border:1px solid #cbd5e1; padding:8px; text-align:center; font-weight:bold; color:#10b981;">${subGrades.annual || '—'}</td>
-                    </tr>
-                `;
-            });
-
-            let majorExamsHTML = `
-                <div style="margin-top:15px; background:#ffffff; padding:10px; border-radius:6px; border:1px solid #cbd5e1;">
-                    <table style="width:100%; border-collapse:collapse; font-size:13px;">
-                        <thead>
-                            <tr style="background:#f1f5f9; color:#334155;">
-                                <th style="border:1px solid #cbd5e1; padding:8px; text-align:left;">Subject</th>
-                                <th style="border:1px solid #cbd5e1; padding:8px; text-align:center;">First Terminal (Onam)</th>
-                                <th style="border:1px solid #cbd5e1; padding:8px; text-align:center;">Second Terminal (Christmas)</th>
-                                <th style="border:1px solid #cbd5e1; padding:8px; text-align:center;">Annual Exam (Final)</th>
-                            </tr>
-                        </thead>
-                        <tbody>${majorRowsHTML}</tbody>
-                    </table>
-                </div>
-            `;
-
-            const photo = student.bio.photo ? `<img src="${student.bio.photo}" style="width:90px; height:90px; object-fit:cover; border:1px solid #cbd5e1; border-radius:6px; float:right; margin-left:15px;">` : `<div style="width:90px; height:90px; border:1px dashed #cbd5e1; background:#f8fafc; display:flex; align-items:center; justify-content:center; float:right; font-size:11px; color:#94a3b8; margin-left:15px;">No Photo</div>`;
-
-            document.getElementById('preview-modal-body-content').innerHTML = `
-                <div style="overflow:hidden; margin-bottom:15px; border-bottom:2px solid #e2e8f0; padding-bottom:15px;">
-                    ${photo}
-                    <h2 style="text-align:left; margin:0 0 5px 0; color:#0f172a; font-size:20px;">${student.bio.name || '—'}</h2>
-                    <p style="margin:0; font-size:13px; color:#64748b;">Admission ID No: <strong>${student.bio.admissionNo || '—'}</strong> | Class: <strong>${student.bio.classYear || '—'}</strong></p>
-                </div>
-                
-                <h5 style="margin:15px 0 8px 0; color:#0f172a; font-size:13px; text-transform:uppercase; letter-spacing:0.5px; border-bottom:1px solid #e2e8f0; padding-bottom:3px;">1. Personal Details</h5>
-                <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap:10px; font-size:13px; margin-bottom:15px;">
-                    <div><span style="color:#64748b;">Gender:</span> ${student.bio.gender || '—'}</div>
-                    <div><span style="color:#64748b;">DOB:</span> ${student.bio.dob || '—'}</div>
-                    <div><span style="color:#64748b;">Blood Group:</span> <strong style="color:#ef4444;">${student.bio.bloodGroup || '—'}</strong></div>
-                    <div><span style="color:#64748b;">Phone:</span> ${student.bio.phone || '—'}</div>
-                    <div><span style="color:#64748b;">Aadhaar:</span> ${student.bio.aadhaar || '—'}</div>
-                    <div><span style="color:#64748b;">Religion/Caste:</span> ${student.bio.religion || '—'} / ${student.bio.caste || '—'}</div>
-                </div>
-                <div style="font-size:13px; margin-bottom:20px;"><span style="color:#64748b;">Home Address:</span> ${student.bio.address || '—'}</div>
-
-                <h5 style="margin:15px 0 8px 0; color:#0f172a; font-size:13px; text-transform:uppercase; letter-spacing:0.5px; border-bottom:1px solid #e2e8f0; padding-bottom:3px;">2. Family & Background</h5>
-                <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap:10px; font-size:13px; margin-bottom:20px;">
-                    <div><span style="color:#64748b;">Father's Name/Job:</span> ${student.bio.father || '—'}</div>
-                    <div><span style="color:#64748b;">Mother's Name/Job:</span> ${student.bio.mother || '—'}</div>
-                    <div><span style="color:#64748b;">Family Structure:</span> ${student.bio.familyStructure || '—'}</div>
-                </div>
-
-                <h5 style="margin:15px 0 8px 0; color:#0f172a; font-size:13px; text-transform:uppercase; letter-spacing:0.5px; border-bottom:1px solid #e2e8f0; padding-bottom:3px;">3. Major Curriculum Board Exams (Kerala Milestone)</h5>
-                ${majorExamsHTML}
-
-                <h5 style="margin:20px 0 8px 0; color:#0f172a; font-size:13px; text-transform:uppercase; letter-spacing:0.5px; border-bottom:1px solid #e2e8f0; padding-bottom:3px;">4. Cumulative Academic Evaluation Logs</h5>
-                ${reportHTML || '<p style="font-size:13px; color:#94a3b8;">No academic matrix blocks linked yet.</p>'}
-                
-                <h5 style="margin:20px 0 8px 0; color:#0f172a; font-size:13px; text-transform:uppercase; letter-spacing:0.5px; border-bottom:1px solid #e2e8f0; padding-bottom:3px;">5. Teacher Remarks Matrix</h5>
-                <p style="font-size:13px; line-height:1.5; white-space: pre-line; background:#f8fafc; padding:12px; border-radius:6px; border:1px solid #e2e8f0; margin:0;">${student.remarks || 'No behavioral notes recorded.'}</p>
-            `;
-
-            document.getElementById('preview-modal-print-btn').onclick = function () {
-                closeQuickPreviewModal();
-                loadStudentForEditing(id);
-                setTimeout(() => { triggerDirectPrint(); }, 300);
-            };
-
-            document.getElementById('quick-preview-modal').classList.add('active');
+            
+            document.getElementById('preview-modal-body-content').innerHTML = reportHTML;
+            document.getElementById('quick-preview-modal').style.display = 'flex';
         }
 
-        function closeQuickPreviewModal() { document.getElementById('quick-preview-modal').classList.remove('active'); }
-
-        function filterStudents() {
-            const query = document.getElementById('search-input').value.toLowerCase();
-            const cards = document.querySelectorAll('.student-profile-card');
-            cards.forEach(card => {
-                if (card.innerText.toLowerCase().includes(query)) card.style.display = "flex";
-                else card.style.display = "none";
-            });
-        }
-
-        function openAddStudentModal() { document.getElementById('add-student-modal').classList.add('active'); }
-        function closeAddStudentModal() { document.getElementById('add-student-modal').classList.remove('active'); }
-
-        function createNewStudentProfile() {
-            const name = document.getElementById('modal-new-name').value.trim();
-            const admNo = document.getElementById('modal-new-adm').value.trim();
-
-            if (!name || !admNo) { alert('Please fill all fields!'); return; }
-            if (globalStudentsDb[admNo]) { alert('Admission ID already exists!'); return; }
-
-            globalStudentsDb[admNo] = {
-                bio: { name: name, admissionNo: admNo, photo: "", gender: "", classYear: "", admDate: "", bloodGroup: "", dob: "", aadhaar: "", caste: "", religion: "", nationality: "", phone: "", address: "", father: "", mother: "", siblings: "", familyStructure: "" },
-                examMonths: [],
-                majorExams: {},
-                remarks: ""
-            };
-
-            document.getElementById('modal-new-name').value = "";
-            document.getElementById('modal-new-adm').value = "";
-            closeAddStudentModal();
-            saveDatabaseToStorage();
-            loadStudentForEditing(admNo);
-        }
-
-        function loadStudentForEditing(id) {
-            activeStudentId = id;
-            const student = globalStudentsDb[id];
-
-            document.getElementById('nav-edit-profile').style.display = "block";
-            document.getElementById('nav-edit-tests').style.display = "block";
-            document.getElementById('nav-edit-major-exams').style.display = "block";
-            document.getElementById('nav-edit-remarks').style.display = "block";
-
-            document.getElementById('bio-name').value = student.bio.name;
-            document.getElementById('bio-gender').value = student.bio.gender || "Female";
-            document.getElementById('bio-class').value = student.bio.classYear;
-            document.getElementById('bio-adm-no').value = student.bio.admissionNo;
-            document.getElementById('bio-adm-date').value = student.bio.admDate;
-            document.getElementById('bio-blood').value = student.bio.bloodGroup;
-            document.getElementById('bio-dob').value = student.bio.dob;
-            document.getElementById('bio-aadhaar').value = student.bio.aadhaar;
-            document.getElementById('bio-caste').value = student.bio.caste;
-            document.getElementById('bio-religion').value = student.bio.religion;
-            document.getElementById('bio-nationality').value = student.bio.nationality;
-            document.getElementById('bio-phone').value = student.bio.phone;
-            document.getElementById('bio-address').value = student.bio.address;
-            document.getElementById('bio-father').value = student.bio.father;
-            document.getElementById('bio-mother').value = student.bio.mother;
-            document.getElementById('bio-siblings').value = student.bio.siblings;
-            document.getElementById('bio-family-type').value = student.bio.familyStructure || "Nuclear Family (അണുകുടുംബം)";
-
-            tempBase64Photo = student.bio.photo;
-            if (tempBase64Photo) {
-                document.getElementById('image-viewbox').innerHTML = `<img src="${tempBase64Photo}" style="width:100%;height:100%;object-fit:cover;">`;
-            } else {
-                document.getElementById('image-viewbox').innerHTML = `<span style="font-size:12px;color:#94a3b8;">No Photo</span>`;
-            }
-
-            document.getElementById('academic-student-subtitle').innerText = `Configuring timeline metrics for student: ${student.bio.name}`;
-            document.getElementById('major-exams-student-subtitle').innerText = `Configuring major board milestones for student: ${student.bio.name}`;
-            document.getElementById('teacher-notes').value = student.remarks || "";
-
-            const savedMajors = student.majorExams || {};
-            majorExamsSubjects.forEach(sub => {
-                const subKey = sub.replace(/\s+/g, '');
-                const gradesData = savedMajors[subKey] || { onam: "", christmas: "", annual: "" };
-
-                document.getElementById(`major-grade-onam-${subKey}`).value = gradesData.onam || "";
-                document.getElementById(`major-grade-christmas-${subKey}`).value = gradesData.christmas || "";
-                document.getElementById(`major-grade-annual-${subKey}`).value = gradesData.annual || "";
-            });
-
-            const wrapper = document.getElementById('months-wrapper');
-            wrapper.innerHTML = "";
-            monthCounter = 0;
-            subjectCounter = 0;
-
-            if (student.examMonths && student.examMonths.length > 0) {
-                student.examMonths.forEach(m => { renderMonthBlockDOM(m.monthName, m.subjects); });
-            } else {
-                addNewMonthBlock();
-            }
-            switchTab('tab-bio');
-        }
-
-        function handleImageUpload(e) {
-            const file = e.target.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = function (event) {
-                tempBase64Photo = event.target.result;
-                document.getElementById('image-viewbox').innerHTML = `<img src="${tempBase64Photo}" style="width:100%;height:100%;object-fit:cover;">`;
-                saveCurrentStudentData();
-            };
-            reader.readAsDataURL(file);
-        }
-
-        function addNewMonthBlock() { renderMonthBlockDOM("", []); saveCurrentStudentData(); }
-
-        function renderMonthBlockDOM(monthNameValue = "", subjectsArray = []) {
-            monthCounter++;
-            const wrapper = document.getElementById('months-wrapper');
-
-            const monthCard = document.createElement('div');
-            monthCard.className = 'card month-node';
-            monthCard.id = `month-card-${monthCounter}`;
-            monthCard.style.borderLeft = "6px solid #4f46e5";
-            monthCard.style.background = "#fafafa";
-
-            monthCard.innerHTML = `
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; background:#f1f5f9; padding:12px; border-radius:8px; gap: 15px; flex-wrap:wrap;">
-                    <div class="form-group" style="margin:0; flex:1; min-width:200px; max-width:300px;">
-                        <label style="font-weight:700; color:#1e293b;">Evaluation Month / Term</label>
-                        <input type="text" class="month-name-input" value="${monthNameValue}" oninput="saveCurrentStudentData()" placeholder="Eg: June 2026...">
-                    </div>
-                    <button class="btn btn-danger" style="padding: 8px 12px; font-size:12px;" onclick="removeNode('month-card-${monthCounter}')">🗑️ Remove Month</button>
-                </div>
-                <div id="subjects-wrapper-${monthCounter}" style="display:flex; flex-direction:column; gap:15px; margin-left:10px;"></div>
-                <button class="btn btn-accent" style="padding: 6px 14px; font-size:12px; margin-top:15px;" onclick="addSubjectToMonth(${monthCounter})">➕ Add Subject</button>
-            `;
-            wrapper.appendChild(monthCard);
-
-            const subWrapper = document.getElementById(`subjects-wrapper-${monthCounter}`);
-            if (subjectsArray.length > 0) {
-                subjectsArray.forEach(sub => { renderSubjectNodeDOM(subWrapper, monthCounter, sub.title, sub.activities); });
-            } else {
-                renderSubjectNodeDOM(subWrapper, monthCounter, "", []);
-            }
-        }
-
-        function addSubjectToMonth(mId) {
-            const subWrapper = document.getElementById(`subjects-wrapper-${mId}`);
-            renderSubjectNodeDOM(subWrapper, mId, "", []);
-            saveCurrentStudentData();
-        }
-
-        function renderSubjectNodeDOM(subWrapper, mId, subjectTitle = "", activitiesArray = []) {
-            subjectCounter++;
-            const currentSubId = subjectCounter;
-
-            const subBox = document.createElement('div');
-            subBox.className = 'subject-node';
-            subBox.id = `sub-box-${currentSubId}`;
-            subBox.style.background = "#ffffff";
-            subBox.style.padding = "15px";
-            subBox.style.borderRadius = "8px";
-            subBox.style.border = "1px solid #cbd5e1";
-
-            subBox.innerHTML = `
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; gap:10px; flex-wrap:wrap;">
-                    <div class="form-group" style="margin:0; flex:1; min-width:180px; max-width:250px;">
-                        <label style="font-weight:600; font-size:13px; color:#475569;">Subject Name</label>
-                        <input type="text" class="subject-title-input" value="${subjectTitle}" oninput="saveCurrentStudentData()" placeholder="Eg: Malayalam...">
-                    </div>
-                    <button class="btn btn-danger" style="padding: 4px 8px; font-size:11px;" onclick="document.getElementById('sub-box-${currentSubId}').remove(); saveCurrentStudentData();">✕ Remove Subject</button>
-                </div>
-                <div id="activities-wrapper-${currentSubId}" style="display:flex; flex-direction:column; gap:8px; margin-top:10px; padding-left:10px; border-left: 2px dashed #e2e8f0;"></div>
-                <button class="btn btn-secondary" style="padding: 4px 10px; font-size:11px; margin-top:8px; background:#f1f5f9; color:#475569;" onclick="addActivityToSubject(${currentSubId})">➕ Add Activity / Test</button>
-            `;
-            subWrapper.appendChild(subBox);
-
-            const actWrapper = document.getElementById(`activities-wrapper-${currentSubId}`);
-            if (activitiesArray.length > 0) {
-                activitiesArray.forEach(act => { injectActivityRowDOM(actWrapper, act.name, act.grade); });
-            } else {
-                injectActivityRowDOM(actWrapper, "", "A+");
-            }
-        }
-
-        function addActivityToSubject(subId) {
-            const actWrapper = document.getElementById(`activities-wrapper-${subId}`);
-            injectActivityRowDOM(actWrapper, "", "A+");
-            saveCurrentStudentData();
-        }
-
-        function injectActivityRowDOM(actWrapper, actName = "", gradeValue = "A+") {
-            const row = document.createElement('div');
-            row.className = 'activity-item-row';
-            row.style.display = "grid";
-            row.style.gridTemplateColumns = "2fr 1fr auto";
-            row.style.gap = "10px";
-            row.style.alignItems = "center";
-
-            row.innerHTML = `
-                <div class="form-group" style="margin:0;"><input type="text" class="act-name-input" value="${actName}" oninput="saveCurrentStudentData()" placeholder="Reading test, Home Work..."></div>
-                <div class="form-group" style="margin:0;">
-                    <select class="act-grade-input" onchange="saveCurrentStudentData()">
-                        <option value="A+" ${gradeValue === 'A+' ? 'selected' : ''}>A+</option>
-                        <option value="A" ${gradeValue === 'A' ? 'selected' : ''}>A</option>
-                        <option value="B+" ${gradeValue === 'B+' ? 'selected' : ''}>B+</option>
-                        <option value="B" ${gradeValue === 'B' ? 'selected' : ''}>B</option>
-                        <option value="C" ${gradeValue === 'C' ? 'selected' : ''}>C</option>
-                        <option value="D" ${gradeValue === 'D' ? 'selected' : ''}>D</option>
-                    </select>
-                </div>
-                <button class="btn btn-danger" style="padding: 6px 10px; background:#fee2e2; color:#ef4444; border:none;" onclick="this.parentElement.remove(); saveCurrentStudentData();">✕</button>
-            `;
-            actWrapper.appendChild(row);
-        }
-
-        function removeNode(id) {
-            if (confirm("Are you sure you want to remove this segment?")) {
-                document.getElementById(id).remove();
-                saveCurrentStudentData();
-            }
-        }
-
-        function saveCurrentStudentData() {
-            if (!activeStudentId) return;
-            const target = globalStudentsDb[activeStudentId];
-
-            target.bio.name = document.getElementById('bio-name').value;
-            target.bio.gender = document.getElementById('bio-gender').value;
-            target.bio.classYear = document.getElementById('bio-class').value;
-            target.bio.admDate = document.getElementById('bio-adm-date').value;
-            target.bio.bloodGroup = document.getElementById('bio-blood').value;
-            target.bio.dob = document.getElementById('bio-dob').value;
-            target.bio.aadhaar = document.getElementById('bio-aadhaar').value;
-            target.bio.caste = document.getElementById('bio-caste').value;
-            target.bio.religion = document.getElementById('bio-religion').value;
-            target.bio.nationality = document.getElementById('bio-nationality').value;
-            target.bio.phone = document.getElementById('bio-phone').value;
-            target.bio.address = document.getElementById('bio-address').value;
-            target.bio.father = document.getElementById('bio-father').value;
-            target.bio.mother = document.getElementById('bio-mother').value;
-            target.bio.siblings = document.getElementById('bio-siblings').value;
-            target.bio.familyStructure = document.getElementById('bio-family-type').value;
-            target.bio.photo = tempBase64Photo;
-            target.remarks = document.getElementById('teacher-notes').value;
-
-            const majorExamsMap = {};
-            majorExamsSubjects.forEach(sub => {
-                const subKey = sub.replace(/\s+/g, '');
-                majorExamsMap[subKey] = {
-                    onam: document.getElementById(`major-grade-onam-${subKey}`).value,
-                    christmas: document.getElementById(`major-grade-christmas-${subKey}`).value,
-                    annual: document.getElementById(`major-grade-annual-${subKey}`).value
-                };
-            });
-            target.majorExams = majorExamsMap;
-
-            target.examMonths = [];
-            document.querySelectorAll('#months-wrapper .month-node').forEach(mCard => {
-                const mName = mCard.querySelector('.month-name-input').value || "General Term";
-                const subjectsList = [];
-
-                mCard.querySelectorAll('.subject-node').forEach(sBox => {
-                    const sTitle = sBox.querySelector('.subject-title-input').value || "General Subject";
-                    const actsList = [];
-                    sBox.querySelectorAll('.activity-item-row').forEach(row => {
-                        actsList.push({
-                            name: row.querySelector('.act-name-input').value || "Evaluation",
-                            grade: row.querySelector('.act-grade-input').value
-                        });
-                    });
-                    subjectsList.push({ title: sTitle, activities: actsList });
-                });
-                target.examMonths.push({ monthName: mName, subjects: subjectsList });
-            });
-
-            localStorage.setItem('classroom_hub_nested_v3_2026', JSON.stringify(globalStudentsDb));
-            updateDashboardDirectory();
-        }
-
-        function finishAndReturnHome() {
-            saveCurrentStudentData();
-            document.getElementById('nav-edit-profile').style.display = "none";
-            document.getElementById('nav-edit-tests').style.display = "none";
-            document.getElementById('nav-edit-major-exams').style.display = "none";
-            document.getElementById('nav-edit-remarks').style.display = "none";
-            activeStudentId = null;
-            switchTab('tab-dashboard');
-        }
-
-        function deleteStudentProfile(id) {
-            if (confirm("ഈ വിദ്യാർത്ഥിയുടെ വിവരങ്ങൾ ശാശ്വതമായി ഡിലീറ്റ് ചെയ്യണോ?")) {
-                // 1. ലോക്കൽ ഡാറ്റാബേസിൽ നിന്ന് ഡിലീറ്റ് ചെയ്യുന്നു
-                delete globalStudentsDb[id];
-
-                // 2. ഫയർബേസിലേക്ക് അപ്‌ഡേറ്റ് ചെയ്ത പുതിയ ലിസ്റ്റ് അയക്കുന്നു
-                db.collection("schoolData").doc("studentsDb").set(globalStudentsDb)
-                    .then(() => {
-                        alert("വിവരങ്ങൾ വിജയകരമായി നീക്കം ചെയ്തു!");
-
-                        // 3. കാർഡുകൾ അപ്‌ഡേറ്റ് ചെയ്യാൻ ഡാഷ്‌ബോർഡ് ഫംഗ്‌ഷൻ വിളിക്കുന്നു
-                        updateDashboardDirectory();
-                    })
-                    .catch((error) => {
-                        console.error("Firebase Error: ", error);
-                        alert("ഡാറ്റ നീക്കം ചെയ്യുന്നതിൽ പരാജയപ്പെട്ടു!");
-                    });
-            }
-        }
-
-
-
-        function switchTab(tabId) {
-            document.querySelectorAll('.app-section').forEach(sec => sec.classList.remove('active'));
-            document.querySelectorAll('.sidebar-item').forEach(item => item.classList.remove('active'));
-
-            document.getElementById(tabId).classList.add('active');
-            if (tabId === 'tab-dashboard') document.querySelectorAll('.sidebar-item')[0].classList.add('active');
-            if (tabId === 'tab-bio') document.getElementById('nav-edit-profile').classList.add('active');
-            if (tabId === 'tab-tests') document.getElementById('nav-edit-tests').classList.add('active');
-            if (tabId === 'tab-major-exams') document.getElementById('nav-edit-major-exams').classList.add('active');
-            if (tabId === 'tab-remarks') document.getElementById('nav-edit-remarks').classList.add('active');
-        }
-
-        function triggerDirectPrint() {
-            if (!activeStudentId) return;
-            saveCurrentStudentData();
-
-            const student = globalStudentsDb[activeStudentId];
-            let reportHTML = "";
-
-            student.examMonths.forEach(m => {
-                let tableRows = "";
-                m.subjects.forEach(sub => {
-                    let activityCount = sub.activities.length;
-                    if (activityCount === 0) {
-                        tableRows += `<tr><td style="font-weight:bold; background:#f8fafc;">${sub.title}</td><td>—</td><td style="text-align:center;">—</td></tr>`;
-                    } else {
-                        sub.activities.forEach((act, idx) => {
-                            if (idx === 0) {
-                                tableRows += `<tr><td rowspan="${activityCount}" style="font-weight:bold; vertical-align:middle; background:#f8fafc; color:#0f172a; width:200px;">${sub.title}</td><td>${act.name}</td><td style="text-align:center; font-weight:bold; color:#4f46e5; width:100px;">${act.grade}</td></tr>`;
-                            } else {
-                                tableRows += `<tr><td>${act.name}</td><td style="text-align:center; font-weight:bold; color:#4f46e5;">${act.grade}</td></tr>`;
-                            }
-                        });
-                    }
-                });
-
-                reportHTML += `
-                    <div style="margin-top:22px; background:#ffffff; padding:12px; border-radius:6px; border:1px solid #cbd5e1;">
-                        <h4 style="color:#4f46e5; font-size:14px; margin-bottom:8px; border-left:4px solid #4f46e5; padding-left:8px;">📅 Term/Month: ${m.monthName}</h4>
-                        <table class="academic-printable-table" style="width:100%; border-collapse:collapse;">
-                            <thead>
-                                <tr style="background:#f1f5f9;">
-                                    <th style="border:1px solid #cbd5e1; padding:8px; text-align:left;">Subject</th>
-                                    <th style="border:1px solid #cbd5e1; padding:8px; text-align:left;">Activity Description</th>
-                                    <th style="border:1px solid #cbd5e1; padding:8px; text-align:center;">Grade</th>
-                                </tr>
-                            </thead>
-                            <tbody>${tableRows || '<tr><td colspan="3">No Records Entered</td></tr>'}</tbody>
-                        </table>
-                    </div>
-                `;
-            });
-
-            const savedMajors = student.majorExams || {};
-            let majorPrintRowsHTML = "";
-            majorExamsSubjects.forEach(sub => {
-                const subKey = sub.replace(/\s+/g, '');
-                const subGrades = savedMajors[subKey] || { onam: "", christmas: "", annual: "" };
-                majorPrintRowsHTML += `
-                    <tr>
-                        <td style="border:1px solid #cbd5e1; padding:8px; font-weight:600;">${sub}</td>
-                        <td style="border:1px solid #cbd5e1; padding:8px; text-align:center; font-weight:bold; color:#4f46e5;">${subGrades.onam || '—'}</td>
-                        <td style="border:1px solid #cbd5e1; padding:8px; text-align:center; font-weight:bold; color:#4f46e5;">${subGrades.christmas || '—'}</td>
-                        <td style="border:1px solid #cbd5e1; padding:8px; text-align:center; font-weight:bold; color:#4f46e5;">${subGrades.annual || '—'}</td>
-                    </tr>
-                `;
-            });
-
-            let majorPrintHTML = `
-                <div style="margin-top:22px; background:#ffffff; padding:12px; border-radius:6px; border:1px solid #cbd5e1;">
-                    <table class="print-table" style="width:100%; border-collapse:collapse;">
-                        <thead>
-                            <tr style="background:#f1f5f9;">
-                                <th style="border:1px solid #cbd5e1; padding:8px; text-align:left;">Subject</th>
-                                <th style="border:1px solid #cbd5e1; padding:8px; text-align:center;">First Terminal (Onam Exam)</th>
-                                <th style="border:1px solid #cbd5e1; padding:8px; text-align:center;">Second Terminal (Christmas Exam)</th>
-                                <th style="border:1px solid #cbd5e1; padding:8px; text-align:center;">Annual Exam (Final Board)</th>
-                            </tr>
-                        </thead>
-                        <tbody>${majorPrintRowsHTML}</tbody>
-                    </table>
-                </div>
-            `;
-
-            const photo = student.bio.photo ? `<img src="${student.bio.photo}" style="width:110px; height:110px; object-fit:cover; border:1px solid #cbd5e1; border-radius:6px; float:right;">` : `<div style="width:110px; height:110px; border:1px dashed #cbd5e1; background:#f8fafc; display:flex; align-items:center; justify-content:center; float:right; font-size:12px; color:#94a3b8;">No Photo</div>`;
-
-            document.getElementById('printable-template').innerHTML = `
-                <div style="overflow:hidden; margin-bottom:20px;">${photo}<h2 class="print-title" style="text-align:left; width:calc(100% - 130px);">STUDENT OVERALL TIMELINE RECORD SHEET</h2></div>
-                <h3 style="margin-bottom:10px; color:#0f172a; border-bottom:1px solid #64748b; padding-bottom:4px;">1. Student Profile</h3>
-                <div class="print-grid">
-                    <div class="print-meta-item"><strong>Name of Student:</strong> ${student.bio.name}</div>
-                    <div class="print-meta-item"><strong>Gender:</strong> ${student.bio.gender}</div>
-                    <div class="print-meta-item"><strong>Class & Year:</strong> ${student.bio.classYear}</div>
-                    <div class="print-meta-item"><strong>Admission Number:</strong> ${student.bio.admissionNo}</div>
-                    <div class="print-meta-item"><strong>Date of Admission:</strong> ${student.bio.admDate}</div>
-                    <div class="print-meta-item"><strong>Blood Group:</strong> ${student.bio.bloodGroup}</div>
-                    <div class="print-meta-item"><strong>Date of Birth:</strong> ${student.bio.dob}</div>
-                </div>
-                <div class="print-meta-item" style="margin-bottom:25px;"><strong>Home Address:</strong> ${student.bio.address}</div>
-                
-                <h3 style="margin-bottom:10px; color:#0f172a; border-bottom:1px solid #64748b; padding-bottom:4px;">2. Major Board Exam Milestones</h3>
-                ${majorPrintHTML}
-
-                <h3 style="margin-bottom:10px; color:#0f172a; border-bottom:1px solid #64748b; padding-bottom:4px; margin-top:25px;">3. Cumulative Academic History</h3>
-                ${reportHTML || '<p>No test data history found.</p>'}
-                
-                <h3 style="margin-bottom:10px; color:#0f172a; border-bottom:1px solid #64748b; padding-bottom:15px; margin-top:25px;">4. General Progress Remarks</h3>
-                <p style="font-size:14px; line-height:1.6; white-space: pre-line; background:#f8fafc; padding:15px; border-radius:6px; border:1px solid #e2e8f0;">${student.remarks || '—'}</p>
-            `;
-            window.print();
+        function closeQuickPreviewModal() {
+            document.getElementById('quick-preview-modal').style.display = 'none';
         }
     </script>
 </body>
-
 </html>
